@@ -1,12 +1,13 @@
 ﻿---
 title: 'Windows PowerShell 终极美化与增强指南'
-description: '将 Windows PowerShell 打造成一个类似 Oh My Zsh 的高效、美观的终端环境。'
+description: '将 Windows PowerShell 打造成一个类似 Oh My Zsh 的高效、美观的终端环境，包含 Starship、Zoxide、智能补全和 0x96f 主题配置。'
 pubDatetime: 2025-12-31T00:00:00Z
 featured: true
 tags:
   - PowerShell
   - DevTools
   - Setup
+  - Windows-Terminal
 ---
 
 本文档记录了如何将 Windows PowerShell 打造成一个类似 Oh My Zsh 的高效、美观的终端环境。
@@ -53,7 +54,67 @@ Starship 依赖 Nerd Fonts 来显示漂亮的图标（如 Git 分支、语言 Lo
 2.  **配置终端**:
     打开 Windows Terminal 设置 -> 外观 -> 字体，选择 **`Maple Mono NF CN`**。
 
-## ⚙️ 5. 配置文件 (`$PROFILE`)
+## 🎨 5. Windows Terminal 主题配置 (0x96f)
+
+为了获得更佳的视觉体验，我们推荐使用 [0x96f Terminal Theme](https://github.com/filipjanevski/0x96f-term-theme) —— 一个简洁舒适的深色终端主题。
+
+### 安装步骤
+
+1.  **下载主题文件**:
+    从 [0x96f-term-theme](https://github.com/filipjanevski/0x96f-term-theme) 仓库下载 `windows-terminal` 文件夹中的主题文件。
+
+2.  **打开 Windows Terminal 设置**:
+    按 `Ctrl + ,` 打开设置界面。
+
+3.  **编辑 settings.json**:
+    在左侧窗格底部点击 `Open JSON file`，打开 `settings.json` 文件。
+
+4.  **添加颜色方案**:
+    找到 `schemes` 部分（应该类似 `"schemes": []`），将以下内容粘贴进去：
+
+    ```json
+    "schemes": [
+        {
+            "name": "0x96f",
+            "background": "#262427",
+            "black": "#262427",
+            "blue": "#49CAE4",
+            "brightBlack": "#545452",
+            "brightBlue": "#64D2E8",
+            "brightCyan": "#BAEBF6",
+            "brightGreen": "#C6E472",
+            "brightPurple": "#AEA3E6",
+            "brightRed": "#FF8787",
+            "brightWhite": "#FCFCFA",
+            "brightYellow": "#FFD271",
+            "cursorColor": "#FCFCFA",
+            "cyan": "#AEE8F4",
+            "foreground": "#FCFCFA",
+            "green": "#BCDF59",
+            "purple": "#A093E2",
+            "red": "#FF7272",
+            "selectionBackground": "#FCFCFA",
+            "white": "#FCFCFA",
+            "yellow": "#FFCA58"
+        }
+    ]
+    ```
+
+5.  **应用主题**:
+    *   在左侧窗格中点击 `Color schemes`
+    *   选择 `0x96f` 并点击 `Set as default`
+    *   确保你使用的配置文件的颜色方案设置为 `0x96f`
+
+### 主题特点
+
+*   **背景**: 深灰色 `#262427`，护眼舒适
+*   **前景色**: 接近白色的 `#FCFCFA`，清晰易读
+*   **配色和谐**: 红、蓝、绿、紫等颜色经过精心调配，不会过于刺眼
+*   **语法高亮优秀**: 适合代码开发，关键字和字符串颜色分明
+
+> 💡 **提示**: 该主题已被 [mbadolato/iTerm2-Color-Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes) 官方收录，质量有保证。
+
+## ⚙️ 6. 配置文件 (`$PROFILE`)
 
 运行 `code $PROFILE` (如果已配置别名) 或 `notepad $PROFILE`，写入以下内容：
 
