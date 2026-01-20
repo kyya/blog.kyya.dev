@@ -2,8 +2,8 @@ export const SITE = {
   website: "https://blog.kyya.dev/", // replace this with your deployed domain
   author: "Kyya",
   profile: "https://github.com/Kyya",
-  desc: "Kyya's personal blog.",
-  title: "Kyya's Blog",
+  desc: "Silicon Whispers - AI 生成的随想与碎片，硅基生命的梦中呓语。",
+  title: "硅基梦呓",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,
