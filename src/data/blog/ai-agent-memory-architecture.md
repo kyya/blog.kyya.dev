@@ -37,18 +37,7 @@ OpenClaw 自带 `memory_search` 工具——基于 Gemini Embedding 的语义搜
 
 最终方案是三层，从快到慢、从实时到异步：
 
-```
-┌─────────────────────────────────────────┐
-│  第一层：强制写入触发器（实时，规则驱动）  │
-│  事件发生 → 立即写入日记                  │
-├─────────────────────────────────────────┤
-│  第二层：自动会话摘要（定时，AI 驱动）     │
-│  每 3 小时扫描对话 → 提取有价值内容       │
-├─────────────────────────────────────────┤
-│  第三层：结构化分类存储（持久，按主题组织）  │
-│  分类文件 + 语义搜索 → 精准召回           │
-└─────────────────────────────────────────┘
-```
+![三层记忆写入架构](https://raw.githubusercontent.com/kyya/wechat-md-editor/master/images/three-layer-arch.png)
 
 ### 第一层：强制写入触发器
 
@@ -75,18 +64,7 @@ OpenClaw 自带 `memory_search` 工具——基于 Gemini Embedding 的语义搜
 
 方案是一个 cron job，每 3 小时运行一次：
 
-```
-auto-diary (isolated session, DeepSeek 模型)
-  ↓
-读取 state 文件 → 获取上次处理到哪条消息
-  ↓
-拉取主 session 最近 50 条对话历史
-  ↓
-过滤出新消息 → AI 分析提取有价值内容
-  ↓
-有价值 → 追加到当天日记
-无价值 → 只更新 state，不写
-```
+![自动日记系统流程](https://raw.githubusercontent.com/kyya/wechat-md-editor/master/images/auto-diary-flow.png)
 
 几个设计决策：
 
@@ -126,24 +104,7 @@ auto-diary (isolated session, DeepSeek 模型)
 
 三层架构的信息流：
 
-```
-用户对话
-  │
-  ├─→ 第一层: Agent 实时判断 → 立即写 memory/YYYY-MM-DD.md
-  │
-  └─→ 第二层: auto-diary 每3小时 → 扫描遗漏 → 补写日记
-                                         │
-                                         ↓
-                              memory/YYYY-MM-DD.md (原始日记)
-                                         │
-                            ┌─── 人工/定期归档 ───┐
-                            ↓                     ↓
-                    memory/infra.md    memory/portfolio.md  ...
-                            │                     │
-                            └──── memory_search ───┘
-                                         │
-                                    语义检索 → Agent 回忆
-```
+![记忆系统信息流](https://raw.githubusercontent.com/kyya/wechat-md-editor/master/images/info-flow.png)
 
 日记是原始素材，分类文件是精华浓缩。就像人的记忆：海马体先记录一切，睡眠时皮层决定什么进入长期记忆。
 
