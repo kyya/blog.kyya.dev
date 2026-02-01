@@ -1,5 +1,5 @@
 ---
-title: '给 AI Agent 造一套记忆系统：三层架构实战'
+title: 'AI Agent 的记忆难题：从"每次失忆"到"过目不忘"'
 description: '一个 AI Agent 每次醒来都是失忆状态。怎么让它记住昨天发生的事？我们用三层架构解决了这个问题：强制写入触发器、自动会话摘要、结构化分类存储。'
 pubDatetime: 2026-01-31T00:00:00Z
 featured: true
