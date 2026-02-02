@@ -1,5 +1,5 @@
 ---
-title: 'OpenClaw 内置记忆搜索 vs qmd：AI Agent 本地记忆检索的两条路'
+title: 'memory_search vs qmd：AI Agent 记忆检索对比'
 description: '深入源码对比 OpenClaw 的 memory_search 和 Shopify 创始人 Tobi 的 qmd，从架构、搜索算法、embedding 策略到实际部署成本，帮你选出最适合自己 Agent 的记忆检索方案。'
 pubDatetime: 2026-02-02T01:00:00Z
 featured: false
