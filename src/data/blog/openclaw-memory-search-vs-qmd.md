@@ -91,18 +91,11 @@ Ray Wang 的测试数据：纯语义搜索精准度 59%，加上混合搜索和 
 
 | 维度 | OpenClaw memory_search | qmd |
 |------|------------------------|-----|
-| 语言 | JavaScript (Node.js) | Rust |
 | 搜索方式 | BM25 + 向量（二层） | BM25 + 向量 + LLM Rerank（三层） |
-| Embedding 模型 | embeddinggemma 300M | Jina v3 330MB |
-| Reranker | 无 | Jina Reranker 640MB |
 | 模型总大小 | 约 330MB | 约 970MB |
-| 存储引擎 | SQLite + sqlite-vec + FTS5 | 自研（Rust） |
 | 集成方式 | 框架内置，零配置 | MCP 协议，需额外配置 |
 | Session 索引 | 支持 | 仅文件 |
-| 增量更新 | 支持（文件监听） | 支持 |
-| Embedding 缓存 | 支持（SQLite 存储） | 未确认 |
-| 多 Provider Fallback | 支持 | 仅本地 |
-| API 成本 | 零（本地模式） | 零 |
+| Provider Fallback | 支持 | 仅本地 |
 
 
 ## 本地 Embedding 实际能用吗？
