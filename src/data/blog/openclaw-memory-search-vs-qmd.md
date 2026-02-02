@@ -22,7 +22,7 @@ tags:
 一直想深入了解记忆系统的我，这次终于下定决心去读了OpenClaw 的源码。
 
 
-## OpenClaw memory_search：框架里的搜索引擎
+## 框架里的搜索引擎
 
 很多人可能不知道，OpenClaw 内置的 memory_search 不是简单的文本匹配，而是一套完整的混合搜索引擎。
 
