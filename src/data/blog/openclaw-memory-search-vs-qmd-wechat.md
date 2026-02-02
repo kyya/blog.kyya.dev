@@ -28,7 +28,9 @@ tags:
 
 很多人可能不知道，OpenClaw 内置的 memory\_search 不是简单的文本匹配，而是一套完整的混合搜索引擎。
 
-我读了两个核心文件：`src/memory/embeddings.ts`<sup>[3]</sup> 和 `src/memory/manager.ts`<sup>[4]</sup>。整个系统可以分成五层：文件层（Markdown 文件和对话记录）、分块层（按 token 切分）、向量层（embedding 计算）、存储层（SQLite 数据库）、搜索层（混合检索）。
+我读了两个核心文件：`src/memory/embeddings.ts`<sup>[3]</sup> 和 `src/memory/manager.ts`<sup>[4]</sup>。整个系统可以分成五层：
+
+![五层架构](/images/five-layer-arch.png)
 
 ### Embedding 的三种来源
 

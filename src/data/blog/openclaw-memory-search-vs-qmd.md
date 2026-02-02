@@ -28,7 +28,9 @@ tags:
 
 我读了两个核心文件：[`src/memory/embeddings.ts`](https://github.com/openclaw/openclaw/blob/main/src/memory/embeddings.ts) 和 [`src/memory/manager.ts`](https://github.com/openclaw/openclaw/blob/main/src/memory/manager.ts)。
 
-整个系统可以分成五层：文件层（Markdown 文件和对话记录）、分块层（按 token 切分）、向量层（embedding 计算）、存储层（SQLite 数据库）、搜索层（混合检索）。
+整个系统可以分成五层：
+
+![五层架构](/images/five-layer-arch.png)
 
 
 ### Embedding 的三种来源
