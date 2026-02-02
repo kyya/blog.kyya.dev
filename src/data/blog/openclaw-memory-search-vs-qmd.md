@@ -39,7 +39,7 @@ OpenClaw 支持三种 embedding 来源，按优先级自动选择。
 
 Local 模式用 node-llama-cpp 加载 GGUF 模型，默认是 embeddinggemma-300M-Q8_0（328MB），完全离线运行。OpenAI 模式和 Gemini 模式分别调用远程 API。
 
-auto 模式下，如果检测到本地模型文件存在，优先用 local；否则按 OpenAI、Gemini 的顺序 fallback。还支持配置 fallback provider——主 provider 挂了自动切换，服务不中断。
+在auto模式中，如果本地模型文件存在，将优先使用本地模型；如果不存在，则按 OpenAI -> Gemini 的顺序进行回退。同时支持配置备用的provider——主provider故障时会自动切换，确保服务不中断。
 
 
 ### 混合搜索怎么工作
