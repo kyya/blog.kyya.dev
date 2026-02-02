@@ -172,10 +172,10 @@ qmd 更适合的场景是：大规模文档库（几百上千个文件），rera
 
 **引用链接**
 
-[1] qmd: https://github.com/tobi/qmd
-[2] OpenClaw: https://github.com/openclaw/openclaw
-[3] src/memory/embeddings.ts: https://github.com/openclaw/openclaw/blob/main/src/memory/embeddings.ts
-[4] src/memory/manager.ts: https://github.com/openclaw/openclaw/blob/main/src/memory/manager.ts
+[1] qmd: https://github.com/tobi/qmd  
+[2] OpenClaw: https://github.com/openclaw/openclaw  
+[3] src/memory/embeddings.ts: https://github.com/openclaw/openclaw/blob/main/src/memory/embeddings.ts  
+[4] src/memory/manager.ts: https://github.com/openclaw/openclaw/blob/main/src/memory/manager.ts  
 [5] Memory Viewer: https://github.com/silicondawn/memory-viewer
 
 ---
