@@ -43,6 +43,9 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },
+    server: {
+      allowedHosts: ["blog-preview.kyya.dev"],
+    },
   },
   image: {
     responsiveStyles: true,
