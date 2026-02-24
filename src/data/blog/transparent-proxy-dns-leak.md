@@ -1,6 +1,6 @@
 ---
-title: '透明代理把我卖了：DNS 泄露导致 Claude 直接判我在中国'
-description: '同一个美国节点，手机 Surge 能上 Claude，家里透明代理却一直 app unavailable in region。最后发现不是节点问题，是我没劫持 UDP 53。'
+title: '透明代理下 Claude 提示地区不可用？八成是 DNS 泄露'
+description: '同一个节点，Surge 能上 Claude，透明代理不行。排查了半天，最后一条 nftables 规则修好了。'
 pubDatetime: 2026-02-24T00:00:00Z
 featured: false
 tags:
@@ -10,183 +10,61 @@ tags:
   - 踩坑
 ---
 
-今天被 Claude 狠狠教育了一次：
+今天踩了个坑，记录一下。
 
-- 手机开 Surge → claude.ai 正常
-- 家里走透明代理 → 打开就是 “app unavailable in region”
+手机开 Surge，同一个美国节点，claude.ai 正常。家里走透明代理，打开就是 "app unavailable in region"。
 
-最气的是：规则看起来一点毛病没有，节点也是美国的。折腾半天，最后只改了一条 nftables 规则就好了。
+## 背景
 
-## 现象：透明代理下 Claude 提示不可用地区
+家里的网络出口是 PVE 上一个 Alpine LXC，里面跑 Mihomo（Clash Meta）做透明代理。YouTube、Google 都没问题，就 Claude 不行。
 
-我的网络大概是这样：
+翻了一圈规则，`claude.ai`、`claude.com`、`anthropic.com` 都指向 AI 代理组，选的美国节点。规则没毛病。
 
-- 家里设备（电脑/手机/平板）
-- 出口是 PVE 上一个 Alpine LXC
-- LXC 里跑 Mihomo（Clash Meta）做透明代理（redir/tproxy 那套）
+拿同一个机场同一个节点，手机 Surge 连上去试，Claude 正常。
 
-其它网站都很正常，YouTube、Google、各种 AI 站都没啥异常。
+所以不是节点的问题，是透明代理这边的实现漏了什么。
 
-只有 claude.ai 一直弹：
+## 原因
 
-> app unavailable in region
+DNS 泄露。
 
-这个提示你一看就知道：它在做地区判断，而且它觉得我在不该出现的地方。
+透明代理劫持了 TCP/UDP 流量到 Mihomo 的代理端口，但 DNS 查询走的是 UDP 53，没有被重定向到 Mihomo 的 DNS 监听端口 1053。
 
-## 初步排查：规则没写错、节点也没问题
+客户端解析 `claude.ai` 的时候，DNS 请求直接走了本地 ISP。虽然最终的 HTTPS 请求从美国出口出去了，但 DNS 那边已经暴露了你的真实位置。Claude 的风控比较严，综合判断后直接拒了。
 
-我第一反应当然是：规则写崩了。
+Mihomo 的 DNS 配置其实写了 DoH，也配了 `fake-ip-range`，但客户端的 DNS 压根没发到 1053——配置写得再好，流量不进来等于没有。
 
-翻了一圈 Mihomo 的规则：
+Surge 不存在这个问题，因为它在应用层就把 DNS 接管了。透明代理是网关级劫持，DNS 要单独处理。
 
-- `claude.ai`
-- `anthropic.com`
+## 修复
 
-都明确指向 AI 代理组，AI 组里选的也是美国节点。
+一条 nftables 规则：
 
-为了排除“节点被封/被 Claude 拉黑”的可能，我拿同一个机场、同一个节点，手机上用 Surge 直连试了下：Claude 正常登录、正常聊天。
-
-这就很诡异了：
-
-- 节点没问题
-- 域名规则没问题
-- 只有“透明代理”这条链路不行
-
-## 关键线索：同一节点 Surge 能用，透明代理不行
-
-这个对比基本把锅甩到了“实现细节”上：
-
-- Surge 是客户端代理：应用层就把请求（包括 DNS）接管了
-- 透明代理是网络层劫持：你只劫持了你以为的流量
-
-讲人话：Surge 像“你所有快递都先送到我这，我再决定怎么发”。透明代理像“我在小区门口拦截快递车”，但你可能只拦了货车，没拦快递员骑的小电驴。
-
-于是我开始怀疑：是不是有一部分关键流量没进代理。
-
-## 根因：DNS 泄露（UDP 53 没被重定向）
-
-最后的结论很土，但也最常见：DNS 泄露。
-
-我的透明代理规则当时只做了两件事：
-
-- 把 TCP/UDP 的普通流量重定向到 Mihomo 的透明代理端口
-- 没管 DNS
-
-结果就是：
-
-- 访问 `claude.ai` 的 HTTP(S) 走了代理（美国出口）
-- 但解析 `claude.ai` 的 DNS 查询直接走了本地 ISP（中国 DNS）
-
-Claude 大概率是用“你解析到的 IP / DNS 路径特征 / 相关风控信号”综合判断地区。
-
-你别看最终请求 IP 是美国出口，DNS 那边已经把你底裤都漏光了。
-
-### 我当时的 Mihomo DNS 配置其实不差，但没用上
-
-我在 Mihomo 里是配了 DoH 的，监听端口也放在了 `1053`：
-
-```yaml
-dns:
-  enable: true
-  listen: 0.0.0.0:1053
-  nameserver:
-    - https://1.1.1.1/dns-query
-    - https://dns.google/dns-query
-  fake-ip-range: 198.18.0.1/16
-  # enhanced-mode 没开（或者没设置成 fake-ip）
+```bash
+nft add rule ip nat mihomo_prerouting udp dport 53 redirect to :1053
 ```
 
-看起来挺美。
+加完刷新 claude.ai，立刻好了。
 
-但问题是：客户端压根没把 DNS 发到 `1053`，它们还在老老实实问路由器/ISP 的 `53`。
+## 持久化
 
-配置写得再花，流量不进来等于 0。
+LXC 里跑的是 Alpine（OpenRC），需要手动持久化 nftables 规则：
 
-## 修复：nftables 劫持 UDP 53 → 1053
-
-修复就一句话：把所有 UDP 53 重定向到 Mihomo 的 DNS 监听端口 `1053`。
-
-我用的是 nftables，规则长这样（示例是 inet 表 + prerouting）：
-
-```nft
-table inet mihomo {
-  chain prerouting {
-    type nat hook prerouting priority -100; policy accept;
-
-    # 让局域网客户端的 DNS 都先进 Mihomo 的 DNS
-    udp dport 53 redirect to :1053
-
-    # 如果你环境里有人用 TCP 53（少见，但不是没有）也可以一起加：
-    # tcp dport 53 redirect to :1053
-  }
-}
-```
-
-加完立刻生效。
-
-回到浏览器刷新 claude.ai，那个“app unavailable in region”当场消失。
-
-我那一刻的感受是：
-
-- 前面查规则、换节点、怀疑人生，全是弯路
-- 真正的 bug 只有一行
-
-## 为什么 Surge 不会踩这个坑？
-
-因为 Surge（以及大部分“客户端代理”）默认就把 DNS 也管了：
-
-- 你系统的 DNS 解析会走它的 DNS 组件
-- 它再决定用 DoH/DoT/代理链路去解析
-
-透明代理这边，你自己做的是“网关级劫持”，那就要想清楚：
-
-- 你劫持了哪些端口？
-- DNS 走 UDP 53，你有没有劫？
-- 你是不是以为配置了 fake-ip-range 就等于开了 fake-ip？（并没有）
-
-如果 DNS 没进代理，很多站你看不出问题（因为它们不敏感）。Claude 这种风控偏凶的，一眼把你揪出来。
-
-## Alpine LXC 下 nftables 持久化（OpenRC 版）
-
-LXC 里跑的是 Alpine，用的是 OpenRC。
-
-我不想每次重启都手敲 nft，直接持久化：
-
-1）确认规则没问题后导出：
-
-```sh
+```bash
+# 导出当前规则
 nft list ruleset > /etc/nftables.conf
-```
 
-2）写一个开机脚本 `local.d`：
-
-```sh
+# 写开机加载脚本
 cat > /etc/local.d/nftables.start <<'EOF'
 #!/bin/sh
 nft -f /etc/nftables.conf
 EOF
-
 chmod +x /etc/local.d/nftables.start
-```
 
-3）确保 local 服务在 default runlevel：
-
-```sh
+# 确保 local 服务在 default runlevel
 rc-update add local default
 ```
 
-重启后 `nft list ruleset` 看一眼，规则还在就 OK。
+## 教训
 
-## 收尾：以后我排查“地区不可用”会先看 DNS
-
-这次坑的本质是：我一直把“出口 IP 是美国”当成结束，但实际上“解析链路”也算一条腿。
-
-所以以后再遇到类似问题，我的 checklist 会变成：
-
-- 请求的流量有没有走代理（出口 IP）
-- DNS 有没有走代理（是不是在问 ISP 的 53）
-- 透明代理有没有单独做 DNS 劫持
-
-如果你也在搞 Mihomo 透明代理，又刚好遇到 Claude/某些站诡异的地区提示，别跟我一样先怀疑节点。
-
-先把 UDP 53 劫了。
+以后遇到"地区不可用"，别只看出口 IP，先确认 DNS 有没有走代理。透明代理环境下 UDP 53 不会自动被劫持，需要显式重定向。
