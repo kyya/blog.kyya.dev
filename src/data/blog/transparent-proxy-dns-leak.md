@@ -3,6 +3,7 @@ title: '透明代理下 Claude 提示地区不可用？八成是 DNS 泄露'
 description: '同一个节点，Surge 能上 Claude，透明代理不行。排查了半天，最后一条 nftables 规则修好了。'
 pubDatetime: 2026-02-24T00:00:00Z
 featured: false
+draft: true
 tags:
   - 网络
   - 代理
