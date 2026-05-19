@@ -1,0 +1,56 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { SITE } from "@/config";
+
+interface Project {
+  name: string;
+  url: string;
+  description: string;
+}
+
+const projects: Project[] = [
+  {
+    name: "cpm",
+    url: "https://github.com/silicondawn/cpm",
+    description: "Claude Code 项目管理器 — 切换 / 备份 / 同步 sessions。",
+  },
+  {
+    name: "pdf-baomu-tutorial",
+    url: "https://github.com/proem/pdf-baomu-tutorial",
+    description: "保姆级教程风格的 PDF 生成 skill。",
+  },
+];
+---
+
+<Layout title={`Projects | ${SITE.title}`}>
+  <Header />
+  <Breadcrumb />
+  <main id="main-content">
+    <section id="projects" class="mb-28 max-w-app">
+      <h1 class="text-2xl tracking-wider sm:text-3xl">Projects</h1>
+      <ul>
+        {
+          projects.map(project => (
+            <li class="my-6">
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
+              >
+                <h2 class="text-lg font-medium decoration-dashed hover:underline">
+                  {project.name}
+                </h2>
+              </a>
+              <p>{project.description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </main>
+  <Footer />
+</Layout>
